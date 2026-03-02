@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class DatabaseService {
                 student.setStudentId(Long.parseLong(fields[0]));
                 student.setFirstName(fields[1]);
                 student.setLastName(fields[2]);
-                student.setDob(fields[3]); // You can convert to LocalDate if needed
+                student.setDob(LocalDate.parse(fields[3]));
                 student.setStudentClass(fields[4]);
 
                 int score = Integer.parseInt(fields[5]) + 5; // CSV -> DB increment
