@@ -125,4 +125,27 @@ public class ReportController {
         workbook.close();
         return out.toByteArray();
     }
+
+    @GetMapping("/list")
+    public ResponseEntity<?> listStudents(
+            @RequestParam(required = false) Long studentId,
+            @RequestParam(required = false) String studentClass,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Student> studentsPage;
+
+        if (studentId != null) {
+            studentsPage = studentRepository.findByStudentId(studentId, pageable);
+        } else if (studentClass != null && !studentClass.isEmpty()) {
+            studentsPage = studentRepository.findByStudentClass(studentClass, pageable);
+        } else {
+            studentsPage = studentRepository.findAll(pageable);
+        }
+
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(studentsPage.getTotalElements()))
+                .body(studentsPage.getContent());
+    }
 }
