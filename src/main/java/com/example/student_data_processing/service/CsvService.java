@@ -1,18 +1,18 @@
 package com.example.student_data_processing.service;
 
+import com.example.student_data_processing.entity.Job;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
-import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.model.StylesTable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.XMLReader;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.util.ArrayList;
@@ -20,33 +20,37 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CsvService {
 
-    @Async("taskExecutor")
-    public void convertExcelToCsv(MultipartFile file) {
+    private final JobService jobService;
 
-        String safeFilePath = "C:\\var\\log\\applications\\API\\dataprocessing\\temp_uploaded.xlsx";
-        String csvFilePath = "C:\\var\\log\\applications\\API\\dataprocessing\\students.csv";
+    @Async("taskExecutor")
+    public void convertExcelToCsv(MultipartFile file, String jobId) {
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String tempExcelPath = "C:\\var\\log\\applications\\API\\dataprocessing\\temp_uploaded_" + timestamp + ".xlsx";
+        String csvFilePath = "C:\\var\\log\\applications\\API\\dataprocessing\\students_" + timestamp + ".csv";
 
         try {
-            File tempFile = new File(safeFilePath);
+            // Save MultipartFile to temp file
+            File tempFile = new File(tempExcelPath);
             file.transferTo(tempFile);
 
             try (OPCPackage pkg = OPCPackage.open(tempFile);
-                 FileWriter fw = new FileWriter(csvFilePath);
-                 BufferedWriter bw = new BufferedWriter(fw)) {
+                 BufferedWriter bw = new BufferedWriter(new FileWriter(csvFilePath))) {
 
                 XSSFReader reader = new XSSFReader(pkg);
                 ReadOnlySharedStringsTable sst = new ReadOnlySharedStringsTable(pkg);
                 StylesTable styles = reader.getStylesTable();
-
                 XSSFReader.SheetIterator iter = (XSSFReader.SheetIterator) reader.getSheetsData();
+
+                final List<String> rowData = new ArrayList<>();
+                int[] processedRows = {0}; // use array to modify inside anonymous class
 
                 while (iter.hasNext()) {
                     try (InputStream sheetStream = iter.next()) {
 
                         XSSFSheetXMLHandler.SheetContentsHandler handler = new XSSFSheetXMLHandler.SheetContentsHandler() {
-                            final List<String> rowData = new ArrayList<>();
 
                             @Override
                             public void startRow(int rowNum) {
@@ -62,10 +66,17 @@ public class CsvService {
                                     }
                                     bw.write(String.join(",", rowData));
                                     bw.newLine();
+
+                                    processedRows[0]++;
+                                    if (processedRows[0] % 10000 == 0) {
+                                        log.info("CSV processed {} rows", processedRows[0]);
+                                        jobService.updateProgress(jobId, processedRows[0]);
+                                    }
+
+
                                 } catch (IOException e) {
                                     log.error("Error writing CSV row", e);
                                 }
-                                if (rowNum % 10000 == 0) log.info("Processed {} rows to CSV", rowNum);
                             }
 
                             @Override
@@ -74,7 +85,9 @@ public class CsvService {
                             }
 
                             @Override
-                            public void headerFooter(String text, boolean isHeader, String tagName) {}
+                            public void headerFooter(String text, boolean isHeader, String tagName) {
+                                // no-op
+                            }
                         };
 
                         SAXParserFactory saxFactory = SAXParserFactory.newInstance();
@@ -85,16 +98,18 @@ public class CsvService {
                     }
                 }
 
+                // Job completed
+                jobService.completeJob(jobId);
                 log.info("CSV generation completed: {}", csvFilePath);
 
-            } catch (OpenXML4JException e) { // Only the superclass
-                log.error("Invalid Excel format or OpenXML4J error", e);
             }
 
+            // Cleanup temp Excel
             if (tempFile.exists()) tempFile.delete();
 
-        } catch (IOException | ParserConfigurationException | org.xml.sax.SAXException e) {
+        } catch (Exception e) {
             log.error("Error converting Excel to CSV", e);
+            jobService.failJob(jobId, e.getMessage());
         }
     }
 }
