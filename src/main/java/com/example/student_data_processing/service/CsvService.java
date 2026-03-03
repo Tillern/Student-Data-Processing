@@ -99,6 +99,11 @@ public class CsvService {
                 }
 
                 // Job completed
+                Job job = jobService.getJobById(jobId);
+
+                job.setProcessedRecords(processedRows[0]);
+                job.setTotalRecords(processedRows[0]);
+
                 jobService.completeJob(jobId);
                 log.info("CSV generation completed: {}", csvFilePath);
 
