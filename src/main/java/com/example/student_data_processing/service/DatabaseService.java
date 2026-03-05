@@ -56,7 +56,7 @@ public class DatabaseService {
                 if (fields.length != 6) continue;
 
                 Student student = new Student();
-                student.setStudentId(Long.parseLong(fields[0]));
+                student.setStudentId(fields[0]);
                 student.setFirstName(fields[1]);
                 student.setLastName(fields[2]);
                 student.setDob(LocalDate.parse(fields[3]));
