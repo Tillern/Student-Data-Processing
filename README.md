@@ -1,20 +1,20 @@
-Data Processing System - Backend
-Project Overview
+### Data Processing System - Backend
+## Project Overview
 A robust Spring Boot application for processing large-scale data (up to 1 million records) with asynchronous operations, job tracking, and comprehensive reporting capabilities.
 
-Architecture
-Technology Stack
-Java 17+ - Core programming language
-Spring Boot 3.4.5 - Application framework
-PostgreSQL - Database
-Apache POI - Excel file processing
-Spring Data JPA - Database operations
-Lombok - Boilerplate code reduction
-SpringDoc OpenAPI - API documentation
+### Architecture
+## Technology Stack
+* Java 17+ - Core programming language
+* Spring Boot 3.4.5 - Application framework
+* PostgreSQL - Database
+* Apache POI - Excel file processing
+* Spring Data JPA - Database operations
+* Lombok - Boilerplate code reduction
+* SpringDoc OpenAPI - API documentation
 
 
 ## Key Architectural Decisions
-Most of these decision are due to the large data set we are dealing with, we have to make sure we are buildng a scable system that maintains good metrics in execution time and space complexity
+* Most of these decision are due to the large data set we are dealing with, we have to make sure we are buildng a scable system that maintains good metrics in execution time and space complexity
 
 1. Asynchronous Processing with Job Tracking
 All long-running operations (Excel generation, file conversion, DB uploads) are handled asynchronously to pevent HTTP request timeouts when processing large data sets like a million records
@@ -46,8 +46,8 @@ Added database indexes on queried columns so as to optimize search performance o
 Dynamic path resolution based on operating system(where the generated Excel and processed CSV are stored) to bring about compatibility across Windows and Linux environments
 
 
-### Dependencies Used & Their Purpose
-* **Spring Boot Starter Web - REST APIs and MVC 
+## Dependencies Used & Their Purpose
+* Spring Boot Starter Web - REST APIs and MVC 
 * Spring Data JPA - Database operations
 * PostgreSQL Driver - Database connectivity
 * Apache POI - Excel file generation and parsing 
@@ -58,12 +58,12 @@ Dynamic path resolution based on operating system(where the generated Excel and 
 
 
 ## Performance Optimizations
-* **Streaming Excel Generation: Uses SXSSFWorkbook to keep memory footprint low
-* **SAX Parsing for Excel: Event-based parsing prevents loading entire file
-* **Batch Database Inserts: 1000 records per batch
-* **Database Indexes: Optimized for search queries
-* **Async Processing: Non-blocking operations with progress tracking
-* **Connection Pooling: HikariCP for efficient database connections
+* Streaming Excel Generation: Uses SXSSFWorkbook to keep memory footprint low
+* SAX Parsing for Excel: Event-based parsing prevents loading entire file
+* Batch Database Inserts: 1000 records per batch
+* Database Indexes: Optimized for search queries
+* Async Processing: Non-blocking operations with progress tracking
+* Connection Pooling: HikariCP for efficient database connections
 
 ## Security Notes
 CORS configured for Angular frontend (http://localhost:4200)
