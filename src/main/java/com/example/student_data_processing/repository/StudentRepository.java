@@ -13,7 +13,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     boolean existsByStudentId(String studentId);
 
-    Page<Student> findByStudentId(Long studentId, Pageable pageable);
+    Page<Student> findByStudentId(String studentId, Pageable pageable);
 
     Page<Student> findByStudentClass(String studentClass, Pageable pageable);
 

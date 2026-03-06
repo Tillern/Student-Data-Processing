@@ -50,7 +50,7 @@ public class ExcelService {
             // Pre-size set to avoid resizing
             Set<String> generatedIds = new HashSet<>((int) total);
 
-            SXSSFWorkbook workbook = new SXSSFWorkbook(100);
+            SXSSFWorkbook workbook = new SXSSFWorkbook(1000);
             Sheet sheet = workbook.createSheet("Students");
 
             Row header = sheet.createRow(0);

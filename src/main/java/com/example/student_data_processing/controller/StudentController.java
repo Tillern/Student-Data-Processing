@@ -19,7 +19,7 @@ public class StudentController {
 
     @GetMapping("/by-id")
     public ResponseEntity<?> getByStudentId(
-            @RequestParam Long studentId,
+            @RequestParam String studentId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
 

@@ -33,7 +33,7 @@ public class ReportController {
      */
     @GetMapping("/export")
     public ResponseEntity<byte[]> exportReport(
-            @RequestParam(required = false) Long studentId,
+            @RequestParam(required = false) String studentId,
             @RequestParam(required = false) String studentClass,
             @RequestParam(defaultValue = "xlsx") String format, // csv or xlsx
             @RequestParam(defaultValue = "0") int page,
@@ -128,7 +128,7 @@ public class ReportController {
 
     @GetMapping("/list")
     public ResponseEntity<?> listStudents(
-            @RequestParam(required = false) Long studentId,
+            @RequestParam(required = false) String studentId,
             @RequestParam(required = false) String studentClass,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "100") int size
